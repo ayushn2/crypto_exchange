@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+type Match struct {
+	Ask *Order
+	Bid *Order
+	Price float64
+	SizeFilled float64
+}
+
 type Order struct {
 	Size float64
 	Bid bool
@@ -26,6 +33,7 @@ func NewOrder(bid bool, size float64) *Order{
 	return &Order{
 		Size: size,
 		Bid: bid,
+		
 		Timestamp: time.Now().UnixNano(),
 	}
 }
@@ -37,6 +45,7 @@ func NewLimit(price float64) *Limit {
 		TotalVolume: 0, // Initialize total volume to zero
 	}
 }
+
 
 func (l *Limit) AddOrder(o *Order) {
 	o.Limit = l
@@ -60,4 +69,51 @@ func (l *Limit) DeleteOrder(o *Order) {
 type Overbook struct {
 	Asks []*Limit // Sell orders
 	Bids []*Limit // Buy orders
+
+	AskLimits map[float64]*Limit
+	BidLimits map[float64]*Limit
+}
+
+func NewOrderBook() *Overbook {
+	return &Overbook{
+		Asks: []*Limit{},
+		Bids: []*Limit{},
+
+		AskLimits: make(map[float64]*Limit),
+		BidLimits: make(map[float64]*Limit),
+	}
+}
+
+func (ob *Overbook) PlaceOrder(price float64, o *Order) []Match{
+	// 1. Check for matches
+	// TODO(@ayushn2): implement matching engine
+
+	// 2. If no matches, add to order book
+	if o.Size > 0.0{
+		ob.add(price, o)
+	}
+	
+	return []Match{}
+}
+
+func (ob *Overbook) add(price float64, o *Order)  {
+	var limit *Limit
+
+	if o.Bid{
+		limit = ob.BidLimits[price]
+	}else{
+		limit = ob.AskLimits[price]
+	}
+
+	if limit == nil{
+		limit = NewLimit(price)
+		limit.AddOrder(o)
+		if o.Bid{
+			ob.Bids = append(ob.Asks, limit)
+			ob.BidLimits[price] = limit
+		}else{
+			ob.Asks = append(ob.Asks, limit)
+			ob.AskLimits[price] = limit
+		}
+	}
 }
