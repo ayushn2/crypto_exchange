@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -25,9 +26,16 @@ func (o *Order) String() string {
 //  Limit represents a price level in the order book with associated orders.
 type Limit struct {
 	Price    float64
-	Orders []*Order
+	Orders Orders
 	TotalVolume float64
 }
+
+type Orders []*Order
+
+// Implement sort.Interface for Orders based on Timestamp for FIFO ordering.
+func (o Orders) Len() int           { return len(o) }
+func (o Orders) Swap(i, j int)      { o[i], o[j] = o[j], o[i] }
+func (o Orders) Less(i, j int) bool { return o[i].Timestamp < o[j].Timestamp }
 
 func NewOrder(bid bool, size float64) *Order{
 	return &Order{
@@ -37,6 +45,39 @@ func NewOrder(bid bool, size float64) *Order{
 		Timestamp: time.Now().UnixNano(),
 	}
 }
+
+type Limits []*Limit
+
+type ByBestAsk struct{ Limits }
+
+func (a ByBestAsk) Len() int           { 
+	return len(a.Limits) 
+}
+
+func (a ByBestAsk) Swap(i, j int)  { 
+	a.Limits[j], a.Limits[i] = a.Limits[i], a.Limits[j]
+}
+
+func (a ByBestAsk) Less(i, j int) bool           { 
+	return a.Limits[i].Price< a.Limits[j].Price
+}
+
+// ByBestBid implements sort.Interface for []Limit based on the Price field.
+
+type ByBestBid struct{ Limits }
+
+func (b ByBestBid) Bid() int           { 
+	return len(b.Limits) 
+}
+
+func (b ByBestBid) Swap(i, j int)  { 
+	b.Limits[j], b.Limits[i] = b.Limits[i], b.Limits[j]
+}
+
+func (b ByBestBid) Less(i, j int) bool           { 
+	return b.Limits[i].Price< b.Limits[j].Price
+}
+
 
 func NewLimit(price float64) *Limit {
 	return &Limit{
@@ -63,7 +104,8 @@ func (l *Limit) DeleteOrder(o *Order) {
 	o.Limit = nil
 	l.TotalVolume -= o.Size
 
-	// TODO(@ayushn2): resort orders by timestamp to maintain FIFO order
+	// resort orders by timestamp to maintain FIFO order
+	sort.Sort(Orders(l.Orders))
 }
 
 type Overbook struct {

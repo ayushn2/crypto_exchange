@@ -1,6 +1,6 @@
-module github.com/ayushn2/crytpo_exchange.git
+module github.com/ayushn2/crypto_exchange
 
-go 1.18
+go 1.25.2
 
 require github.com/stretchr/testify v1.11.1
 

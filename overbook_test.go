@@ -35,9 +35,13 @@ func TestOrderBook(t *testing.T){
 	ob := NewOrderBook()
 	
 
-	buyOrder := NewOrder(true, 10)
-	ob.PlaceOrder(10_000, buyOrder)
+	buyOrderA := NewOrder(true, 10)
+	buyOrderB := NewOrder(true, 2000)
 
-	fmt.Printf("%+v",ob.Bids[0])
+
+	ob.PlaceOrder(18_000, buyOrderA)
+	ob.PlaceOrder(19_000, buyOrderB)
+
+	fmt.Printf("%+v", ob)
 }
 
