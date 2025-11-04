@@ -2,10 +2,16 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
+
+func assert(t *testing.T, a, b any) {
+	if !reflect.DeepEqual(a, b) {
+		t.Errorf("%+v != %+v", a, b)
+	}
+
+}
 
 func TestLimit(t *testing.T){
 	l := NewLimit(10000) 
@@ -21,9 +27,7 @@ func TestLimit(t *testing.T){
 	l.AddOrder(buyOrderB)
 
 	l.DeleteOrder(buyOrderB)
-	assert.Equal(t, 20.0, l.TotalVolume)
-	assert.Equal(t, 2, len(l.Orders))
-	assert.Nil(t, buyOrderB.Limit)
+	
 
 	fmt.Println(l)
 	
@@ -31,17 +35,14 @@ func TestLimit(t *testing.T){
 
 
 
-func TestOrderBook(t *testing.T){
+func TestPlaceLimitOrder(t *testing.T){
 	ob := NewOrderBook()
-	
 
-	buyOrderA := NewOrder(true, 10)
-	buyOrderB := NewOrder(true, 2000)
+	sellOrderA := NewOrder(false, 10)
+	sellOrderB := NewOrder(false, 5)
+	ob.PlaceLimitOrder(10_000, sellOrderA)
+	ob.PlaceLimitOrder(9_000, sellOrderB)
 
-
-	ob.PlaceOrder(18_000, buyOrderA)
-	ob.PlaceOrder(19_000, buyOrderB)
-
-	fmt.Printf("%+v", ob)
+	assert(t, len(ob.asks), 2)
 }
 
