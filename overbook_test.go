@@ -46,3 +46,16 @@ func TestPlaceLimitOrder(t *testing.T){
 	assert(t, len(ob.asks), 2)
 }
 
+func TestPlaceMarketOrder(t *testing.T){
+	ob := NewOrderBook()
+
+	sellOrderA := NewOrder(false, 20)
+	ob.PlaceLimitOrder(10_000, sellOrderA)
+
+	buyOrderA := NewOrder(true, 5)
+	ob.PlaceLimitOrder(10_000, buyOrderA)
+	matches := ob.PlaceMarketOrder(buyOrderA)
+
+	fmt.Printf("%+v\n", matches)
+
+}
