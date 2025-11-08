@@ -56,6 +56,15 @@ func TestPlaceMarketOrder(t *testing.T){
 	ob.PlaceLimitOrder(10_000, buyOrderA)
 	matches := ob.PlaceMarketOrder(buyOrderA)
 
+	assert(t, len(matches), 1)
+	assert(t, len(ob.asks), 1)
+	assert(t, ob.AskTotalVolume(), 15.0)
+	assert(t, matches[0].Ask, sellOrderA)
+	assert(t, matches[0].Bid, buyOrderA)
+	assert(t, matches[0].Price, 10_000.0)
+	assert(t, matches[0].SizeFilled, 5.0)
+	assert(t, buyOrderA.IsFilled(), true)
+
 	fmt.Printf("%+v\n", matches)
 
 }

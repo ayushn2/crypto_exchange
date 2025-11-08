@@ -121,6 +121,8 @@ func (l *Limit) Fill(o *Order) []*Match{
 		match := l.fillOrder(order, o)
 		matches = append(matches, match)
 
+		l.TotalVolume -= match.SizeFilled
+
 		if o.IsFilled(){
 			break
 		}
@@ -183,8 +185,8 @@ func (ob *Orderbook) PlaceMarketOrder(o *Order) []*Match{
 	matches := []*Match{}
 
 	if o.Bid{
-		if o.Size > ob.AskTokenVolume(){
-			panic(fmt.Errorf("not enough liquidity [size: %.2f] for order [size: %.2f]", ob.AskTokenVolume(), o.Size))
+		if o.Size > ob.AskTotalVolume(){
+			panic(fmt.Errorf("not enough liquidity [size: %.2f] for order [size: %.2f]", ob.AskTotalVolume(), o.Size))
 		}
 
 		for _, askLimit := range ob.Asks(){
@@ -229,7 +231,7 @@ func (ob *Orderbook) BidTokenVolume() float64{
 	return totalVolume
 }
 
-func (ob *Orderbook) AskTokenVolume() float64{
+func (ob *Orderbook) AskTotalVolume() float64{
 	totalVolume := 0.0
 	for _, askLimit := range ob.Asks(){
 		totalVolume += askLimit.TotalVolume
