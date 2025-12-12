@@ -68,3 +68,29 @@ func TestPlaceMarketOrder(t *testing.T){
 	fmt.Printf("%+v\n", matches)
 
 }
+
+func TestPlaceMarketOrderMultiFill(t *testing.T){
+	ob := NewOrderBook()
+
+	buyOrderA := NewOrder(true, 5)
+	buyOrderB := NewOrder(true, 8)
+	buyOrderC := NewOrder(true, 10)
+	// A limit is a bucket of orders at the same price level
+	ob.PlaceLimitOrder(5_000, buyOrderC)
+	ob.PlaceLimitOrder(9_000, buyOrderB)
+	ob.PlaceLimitOrder(10_000, buyOrderA)
+
+	assert(t, ob.BidTotalVolume(), 23.0)
+
+	sellOrderA := NewOrder(false, 20) // Market sell order of size 20
+	matches := ob.PlaceMarketOrder(sellOrderA) // Should match against buyOrderA, buyOrderB, buyOrderC
+
+	// All buy orders should be filled
+	assert(t, ob.BidTotalVolume(), 3.0)
+
+	assert(t, len(matches), 3) // 3 matches to fill the sell order
+	assert(t, len(ob.bids), 1)
+
+	fmt.Printf("%+v", matches)
+	
+}
