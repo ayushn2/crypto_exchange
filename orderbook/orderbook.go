@@ -79,8 +79,8 @@ func (b ByBestBid) Swap(i, j int)  {
 	b.Limits[j], b.Limits[i] = b.Limits[i], b.Limits[j]
 }
 
-func (b ByBestBid) Less(i, j int) bool           { 
-	return b.Limits[i].Price< b.Limits[j].Price
+func (b ByBestBid) Less(i, j int) bool {
+    return b.Limits[i].Price > b.Limits[j].Price
 }
 
 
@@ -120,21 +120,23 @@ func (l *Limit) Fill(o *Order) []Match{
 		ordersToDelete []*Order
 	)
 	
+	
 
-	for _, order := range l.Orders{
-		match := l.fillOrder(order, o)
-		matches = append(matches, match)
+	for _, order := range l.Orders {
+    if o.IsFilled() {
+        break
+    }
 
-		l.TotalVolume -= match.SizeFilled
+    match := l.fillOrder(order, o)
 
-		if order.IsFilled(){
-			ordersToDelete = append(ordersToDelete, order)
-		}
+    matches = append(matches, match)
+    l.TotalVolume -= match.SizeFilled
 
-		if o.IsFilled(){
-			break
-		}
+    if order.IsFilled() {
+        ordersToDelete = append(ordersToDelete, order)
+    }
 }
+
 	for _, orderToDelete := range ordersToDelete{
 		l.DeleteOrder(orderToDelete)
 	}
